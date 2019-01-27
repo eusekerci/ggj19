@@ -40,6 +40,7 @@ public class SocketIOScript : MonoBehaviour
 	public Dictionary<int, Transform> Players;
 	public List<KeyValuePair<int, string>> PlayerCommands;
 	public List<KeyValuePair<int, string>> PlayerLoadCommands;
+	public List<Transform> Dummies;
 	public Transform PlayerPrefab;
 
 	public GameState CurrentState;
@@ -70,6 +71,7 @@ public class SocketIOScript : MonoBehaviour
 		Players = new Dictionary<int, Transform>();
 		PlayerCommands = new List<KeyValuePair<int, string>>();
 		PlayerLoadCommands = new List<KeyValuePair<int, string>>();
+		Dummies = new List<Transform>();
 		DoOpen ();
 	}
 
@@ -102,6 +104,7 @@ public class SocketIOScript : MonoBehaviour
 							new Vector3(Random.Range(-14.5f, 14.5f), Random.Range(5.1f, 12.1f), 0), Quaternion.identity);
 						bosGo.GetComponent<Renderer>().material.color = new Color(Random.Range(0.0f,1.0f), Random.Range(0.0f,1.0f), Random.Range(0.0f,1.0f));
 						bosGo.GetComponent<CollisionCheck>().npc = true;
+						Dummies.Add(bosGo.transform);
 						
 						go.gameObject.name = "Player " + loadCommand.Key;
 						Players.Add(loadCommand.Key, go.transform);
@@ -126,19 +129,32 @@ public class SocketIOScript : MonoBehaviour
 		else if (CurrentState == GameState.WIN)
 		{
 			AnnouncementText.text = Winner + " WON!";
+			UnloadAllScenesExcept("GameScene");
+			if(Dummies.Count > 0)
+			foreach (var dummy in Dummies)
+			{
+				Destroy(dummy.gameObject);
+			}
+			Dummies.Clear();
 		}
 
 		if (Input.GetKeyUp(KeyCode.A))
 		{
 			CurrentState = GameState.PREPARE;
 		}
-		else if (Input.GetKeyUp(KeyCode.S))
+		else if (Input.GetKeyUp(KeyCode.Alpha1))
 		{
 			SceneManager.LoadScene(1, LoadSceneMode.Additive);
 			CurrentState = GameState.PLAY;
 		}
-		else if (Input.GetKeyUp(KeyCode.D))
+		else if (Input.GetKeyUp(KeyCode.Alpha2))
 		{
+			SceneManager.LoadScene(2, LoadSceneMode.Additive);
+			CurrentState = GameState.PLAY;
+		}
+		else if (Input.GetKeyUp(KeyCode.Alpha3))
+		{
+			SceneManager.LoadScene(3, LoadSceneMode.Additive);
 			CurrentState = GameState.PLAY;
 		}
 	}
@@ -199,6 +215,19 @@ public class SocketIOScript : MonoBehaviour
 		else if (direction == "Up")
 		{
 			Players[id].position += new Vector3(0, movementSpeed, 0);
+		}
+	}
+	
+	void UnloadAllScenesExcept(string sceneName) 
+	{
+		int c = SceneManager.sceneCount;
+		for (int i = 0; i < c; i++) 
+		{
+			Scene scene = SceneManager.GetSceneAt (i);
+			if (scene.name != sceneName) 
+			{
+				SceneManager.UnloadSceneAsync (scene);
+			}
 		}
 	}
 }

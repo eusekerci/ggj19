@@ -14,6 +14,7 @@ public class CollisionCheck : MonoBehaviour
 	private Collider mCollider;
 
 	public bool npc;
+	public int loadedScene;
 	
 	void Start ()
 	{
@@ -66,7 +67,6 @@ public class CollisionCheck : MonoBehaviour
 	{
 		if (other.gameObject.CompareTag("Finish"))
 		{
-			SceneManager.UnloadSceneAsync(1);
 			SocketIOScript.Instance.CurrentState = GameState.WIN;
 			SocketIOScript.Instance.Winner = gameObject.name;
 		}
